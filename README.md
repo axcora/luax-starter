@@ -1,8 +1,8 @@
 # LUAX SSG
 
-Static Site Generator built with Lua
+**Static Site Generator built with Lua**
 
-LUAX is a lightweight, fast, and modern static site generator built with Lua. It uses the LAX template engine to generate static websites from Markdown content with YAML frontmatter.
+LUAX is a lightweight, fast, and modern **static site generator** built with [Lua](https://www.lua.org/). It uses the LAX template engine to generate static websites from Markdown content with YAML frontmatter.
 
 Read Documentation on [https://luax.axcora.com](https://luax.axcora.com)
 
