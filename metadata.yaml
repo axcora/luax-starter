@@ -1,0 +1,64 @@
+url: http://localhost:8080
+title: LUAX SSG
+description: Static Site Generator built with Lua
+image: /img/axcoralogored.webp
+favicon: /img/axcoralogored.webp
+twitter_user: https://www.axcora.com
+
+navbar:
+  logo: /img/axcoralogored.webp
+  list:
+    - title: Home
+      url: /
+    - title: Blog
+      url: /blog.html
+    - title: Docs
+      url: https://luax.axcora.com
+    - title: About
+      url: /about.html
+
+home:
+  title: LUAX SSG
+  description: Static Site Generator built with Lua
+  image: /img/axcoralogored.webp
+  blog_title: Latest Posts
+
+blog: 
+  title: Blog
+  description: Last update from article blog
+  image: /img/axcoralogored.webp
+
+tags: 
+  title: Tags
+  description: All tags from posts
+  image: /img/axcoralogored.webp
+
+footer:
+  nav1:
+    title: LUAX
+    description: Static Site Generator built with Lua
+  nav2:
+    - title: Home
+      url: /
+    - title: Blog
+      url: /blog.html
+    - title: Docs
+      url: https://luax.axcora.com
+  nav3:
+    - title: Axcora SSG
+      url: https://ssg.axcora.com
+    - title: AX SSG
+      url: https://ax.axcora.
+    - title: Markdownuts
+      url: https://markdownuts.axcora.com
+    - title: ONTA
+      url: https://onta.axcora.com
+    - title: PYCORA
+      url: https://pycora.axcora.com
+    - title: BAX
+      url: https://bax.axcora.com
+  nav4:
+    - title: Hire Us
+      url: https://fiverr.com/creativitas
+    - title: GitHub
+      url: https://github.com/mesinkasir/luax

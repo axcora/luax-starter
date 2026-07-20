@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@title</title>
+    <meta name="description" content="@description">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="@og_type">
+    <meta property="og:title" content="@og_title">
+    <meta property="og:description" content="@og_description">
+    <meta property="og:image" content="@metadata.url@og_image">
+    <meta property="og:url" content="@metadata.url">
+    <meta property="og:site_name" content="@metadata.title">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@og_title">
+    <meta name="twitter:description" content="@og_description">
+    <meta name="twitter:image" content="@metadata.url@og_image">
+    @if metadata.twitter_user
+        <meta name="twitter:site" content="@metadata.twitter_user">
+    @end
+    
+    <!-- Favicon -->
+    @if metadata.favicon
+        <link rel="icon" href="@metadata.url@metadata.favicon">
+    @end
+    
+    <link rel="stylesheet" href="@metadata.url/css/style.css">
+    
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "@json_ld_type",
+        "headline": "@json_ld_headline",
+        "description": "@json_ld_description",
+        "url": "@json_ld_url",
+        "datePublished": "@json_ld_date",
+        "dateModified": "@json_ld_date",
+        "author": {
+            "@type": "Person",
+            "name": "@json_ld_author"
+        }
+    }
+    </script>
+</head>
+<body>
+    @include(header)
+    
+	<h1>COK</h1>
+    
+        @content
+    
+    
+    @include(footer)
+</body>
+</html>

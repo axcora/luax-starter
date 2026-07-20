@@ -1,0 +1,14 @@
+{
+  "name": "luax-ssg",
+  "version": "1.0.0",
+  "description": "Static Site Generator with Lua + LAX Template",
+  "main": "ssg.lua",
+  "scripts": {
+    "start": "lua55 ssg.lua",
+    "build": "lua55 ssg.lua",
+    "dev": "lua55 watch.lua"
+  },
+  "keywords": ["ssg", "lua", "static-site", "generator"],
+  "author": "Axcora",
+  "license": "MIT"
+}
