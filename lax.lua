@@ -92,7 +92,7 @@ function Lax:render()
         return ""
     end)
     
-    -- 6. Render layout
+    -- 6. Render dengan layout
     if layout_name then
         local layout_paths = {
             "templates/layouts/" .. layout_name,

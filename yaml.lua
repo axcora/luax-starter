@@ -1,109 +1,160 @@
 local yaml = {}
 
 function yaml.parse(content)
+    content = content:gsub("^%z", "")
+    content = content:gsub("\r\n", "\n")
+    local data = {}
+    local stack = { data }
+    local indent_stack = { -1 }
+
     local lines = {}
     for line in content:gmatch("[^\n]+") do
         if not line:match("^%s*#") and line:match("%S") then
-            table.insert(lines, {
-                text = line,
-                indent = line:match("^%s*") and #line:match("^%s*") or 0,
-                stripped = line:gsub("^%s*", ""):gsub("%s*$", "")
-            })
+            table.insert(lines, line)
         end
     end
-    
-    local function parse_block(start_idx, base_indent)
-        local result = {}
-        local i = start_idx
-        local current_key = nil
-        local current_list = nil
-        
-        while i <= #lines do
-            local line = lines[i]
-            if line.indent < base_indent then
-                break
+
+    local i = 1
+    while i <= #lines do
+        local line = lines[i]
+        local indent = #(line:match("^%s*") or "")
+        local stripped = line:gsub("^%s*", ""):gsub("%s*$", "")
+
+        while #stack > 1 and indent <= indent_stack[#indent_stack] do
+            table.remove(stack)
+            table.remove(indent_stack)
+        end
+
+        if stripped:match("^- ") then
+            local value = stripped:gsub("^- ", "")
+            value = value:gsub('^"', ''):gsub('"$', '')
+            value = value:gsub("^'", ''):gsub("'$", '')
+
+            local target = stack[#stack]
+            if not target._list then
+                target._list = {}
             end
-            
-            local stripped = line.stripped
-            
-            -- Check if it's a list item
-            if stripped:match("^- ") then
-                local value = stripped:gsub("^- ", "")
-                value = value:gsub('"', ''):gsub("'", "")
-                
-                -- Check if list item contains key:value
-                local k, v = value:match("^(.-):%s*(.+)$")
-                if k and v then
+
+            local k, v = value:match("^(.-):%s*(.+)$")
+            if k and v then
+                local item = {}
+                k = k:gsub("^%s*(.-)%s*$", "%1")
+                v = v:gsub('"', ''):gsub("'", "")
+                v = v:gsub("^%s*(.-)%s*$", "%1")
+                item[k] = v
+
+                if i + 1 <= #lines then
+                    local next_line = lines[i + 1]
+                    local next_indent = #(next_line:match("^%s*") or "")
+                    if next_indent > indent then
+                        table.insert(stack, item)
+                        table.insert(indent_stack, indent)
+                    end
+                end
+
+                table.insert(target._list, item)
+            else
+                local sub_k = value:match("^(.-):%s*$")
+                if sub_k then
                     local item = {}
-                    k = k:gsub("^%s*(.-)%s*$", "%1")
-                    v = v:gsub('"', ''):gsub("'", "")
-                    v = v:gsub("^%s*(.-)%s*$", "%1")
-                    item[k] = v
-                    
-                    -- Check for nested content in this list item
-                    if i + 1 <= #lines and lines[i+1].indent > line.indent then
-                        local nested, next_i = parse_block(i + 1, line.indent + 2)
-                        for nk, nv in pairs(nested) do
-                            item[nk] = nv
-                        end
-                        i = next_i - 1
-                    end
-                    
-                    table.insert(result, item)
+                    local inner = {}
+                    sub_k = sub_k:gsub("^%s*(.-)%s*$", "%1")
+                    item[sub_k] = inner
+                    table.insert(target._list, item)
+                    table.insert(stack, item)
+                    table.insert(indent_stack, indent)
+                    table.insert(stack, inner)
+                    table.insert(indent_stack, indent)
                 else
-                    -- Simple list item
-                    local item = value
-                    
-                    -- Check for nested content
-                    if i + 1 <= #lines and lines[i+1].indent > line.indent then
-                        local nested, next_i = parse_block(i + 1, line.indent + 2)
-                        item = nested
-                        i = next_i - 1
-                    end
-                    
-                    table.insert(result, item)
+                    table.insert(target._list, value)
+                end
+            end
+
+            i = i + 1
+            goto continue
+        end
+
+        local key, value = stripped:match("^(.-):%s*(.*)$")
+        if key then
+            key = key:gsub("^%s*(.-)%s*$", "%1")
+            value = value:gsub('^"', ''):gsub('"$', '')
+            value = value:gsub("^'", ''):gsub("'$", '')
+
+            local target = stack[#stack]
+
+            if i + 1 <= #lines then
+                local next_line = lines[i + 1]
+                local next_indent = #(next_line:match("^%s*") or "")
+                if next_indent > indent then
+                    local new_table = {}
+                    target[key] = new_table
+                    table.insert(stack, new_table)
+                    table.insert(indent_stack, indent)
+                else
+                    target[key] = value
                 end
             else
-                -- Key: value pair
-                local key, value = stripped:match("^(.-):%s*(.*)$")
-                if key then
-                    key = key:gsub("^%s*(.-)%s*$", "%1")
-                    value = value:gsub('"', ''):gsub("'", "")
-                    value = value:gsub("^%s*(.-)%s*$", "%1")
-                    
-                    -- Check for nested content (multiline or list)
-                    if i + 1 <= #lines and lines[i+1].indent > line.indent then
-                        local nested, next_i = parse_block(i + 1, line.indent + 2)
-                        
-                        -- If nested is a list, use it directly
-                        if #nested > 0 and nested[1] and type(nested[1]) == "table" then
-                            result[key] = nested
-                        else
-                            -- Merge nested values
-                            if type(result[key]) == "table" then
-                                for nk, nv in pairs(nested) do
-                                    result[key][nk] = nv
-                                end
-                            else
-                                result[key] = nested
-                            end
-                        end
-                        i = next_i - 1
-                    else
-                        -- Simple key:value
-                        result[key] = value
+                target[key] = value
+            end
+
+            i = i + 1
+            goto continue
+        end
+
+        i = i + 1
+        ::continue::
+    end
+
+    local function convert(t)
+        if type(t) ~= "table" then return t end
+
+        if t._list then
+            for _, it in ipairs(t._list) do
+                convert(it)
+            end
+        end
+
+        for k, v in pairs(t) do
+            if k ~= "_list" and type(v) == "table" then
+                convert(v)
+                if v._list then
+                    local arr = {}
+                    for _, item in ipairs(v._list) do
+                        table.insert(arr, item)
                     end
+                    t[k] = arr
                 end
             end
-            
-            i = i + 1
         end
-        
-        return result, i
+
+        if t._list and not t._is_list_checked then
+            -- kalau t itu sendiri adalah list container yang nempel di parent
+            -- biarin, yang convert parentnya
+        end
+
+        return t
     end
-    
-    local data, _ = parse_block(1, 0)
-    return data
+
+    local function finalize(t)
+        if type(t) ~= "table" then return t end
+        if t._list then
+            local arr = {}
+            for _, item in ipairs(t._list) do
+                table.insert(arr, finalize(item))
+            end
+            return arr
+        end
+        local out = {}
+        for k, v in pairs(t) do
+            if k ~= "_list" and k ~= "_is_list_checked" then
+                out[k] = finalize(v)
+            end
+        end
+        return out
+    end
+
+    convert(data)
+    return finalize(data)
 end
 
 return yaml
