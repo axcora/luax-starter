@@ -1,4 +1,4 @@
-url: http://localhost:8080
+url: https://luax-starter.vercel.app/
 title: LUAX SSG
 description: Static Site Generator built with Lua
 image: /img/axcoralogored.webp
