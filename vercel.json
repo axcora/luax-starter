@@ -1,5 +1,5 @@
 {
-  "installCommand": "sudo apt-get update && sudo apt-get install -y lua5.3",
+  "installCommand": "apt-get update && apt-get install -y lua5.3",
   "buildCommand": "lua build.lua",
   "outputDirectory": "dist",
   "framework": null
