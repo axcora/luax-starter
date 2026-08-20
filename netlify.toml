@@ -1,0 +1,6 @@
+[build]
+  command = "lua build.lua"
+  publish = "dist"
+
+[build.environment]
+  LUA_VERSION = "5.3"
